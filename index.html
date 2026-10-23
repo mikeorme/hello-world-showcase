@@ -15,7 +15,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,100..900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  @view-transition { navigation: auto; }
   :root{
     --bg:#050308; --bg2:#0d0914; --ink:#fbf7ef; --muted:rgba(251,247,239,.62);
     --line:rgba(251,247,239,.14); --accent:#f0a35c; --accent2:#c0476a;
@@ -45,15 +44,15 @@
   .reveal{opacity:1}
   @supports (animation-timeline: view()){
     .reveal{animation:rise linear both; animation-timeline:view(); animation-range:entry 0% cover 28%}
-    @keyframes rise{from{opacity:0; transform:translateY(40px)} to{opacity:1; transform:none}}
+    @keyframes rise{from{opacity:0; translate:0 40px} to{opacity:1; translate:none}}
   }
   @supports not (animation-timeline: view()){
-    .js .reveal{opacity:0; transform:translateY(40px); transition:opacity .8s, transform .8s}
-    .js .reveal.in{opacity:1; transform:none}
+    .js .reveal{opacity:0; translate:0 40px; transition:opacity .8s, translate .8s}
+    .js .reveal.in{opacity:1; translate:none}
   }
   @media (prefers-reduced-motion: reduce){
     html{scroll-behavior:auto}
-    .reveal{animation:none!important; opacity:1!important; transform:none!important; transition:none!important}
+    .reveal{animation:none!important; opacity:1!important; translate:none!important; transition:none!important}
   }
 
   .champions{display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%,320px),1fr)); gap:28px; margin-top:56px}
@@ -102,7 +101,7 @@
 <section class="chapter" id="draft"><div class="wrap">
   <p class="kicker reveal">Chapter 2 · The Rejected Draft</p>
   <h2 class="reveal">The first version had confetti.</h2>
-  <p class="lede reveal">It also had a fake day-counter, a nine-version changelog, and an elaborate joke about the process that produced it. The room loved it for almost a full minute.</p>
+  <p class="lede reveal">It also had a fake day-counter, a nine-version changelog, and an elaborate joke about the process that produced it.</p>
   <blockquote class="reveal">“The confetti is lame.”<cite>Leadership, reviewing draft one</cite></blockquote>
   <p class="lede reveal">The deeper note was fairer: the page was making fun of the work instead of delivering the message. Focus on the message. Level up the craft.</p>
 </div></section>
@@ -116,8 +115,8 @@
 
 <section class="chapter" id="champions"><div class="wrap">
   <p class="kicker reveal">Chapter 4 · The Five Champions</p>
-  <h2 class="reveal">“Five other versions. Very different.”</h2>
-  <p class="lede reveal">Each championed by one team member, and in the legend, each one a protest against the page before it.</p>
+  <h2 class="reveal">Five other versions. Very different.</h2>
+  <p class="lede reveal">Each championed by one team member, and in the legend, each one a protest against the page before it. The meetings are dramatized. The pages are real.</p>
   <div class="champions">
     <article class="card reveal">
       <div class="frame"><iframe title="Preview of Sam's terminal" data-src="hello-sam-repl.html" tabindex="-1" inert sandbox="allow-scripts"></iframe></div>
@@ -190,9 +189,11 @@
     const f = frame.querySelector('iframe');
     const fit = () => frame.style.setProperty('--s', frame.clientWidth / 1280);
     new ResizeObserver(fit).observe(frame); fit();
-    new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) { if (f.getAttribute('src') !== f.dataset.src) f.src = f.dataset.src; }
-      else if (f.getAttribute('src')) { f.src = 'about:blank'; f.removeAttribute('src'); }
+    f.remove(); // attached only while in view; re-attaching adds no history entries
+    new IntersectionObserver((entries) => {
+      const e = entries.at(-1);
+      if (e.isIntersecting) { if (!f.isConnected) { f.src = f.dataset.src; frame.append(f); } }
+      else f.remove();
     }, { rootMargin: '150px' }).observe(frame);
   });
 </script>
