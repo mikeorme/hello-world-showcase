@@ -6,7 +6,8 @@ Each page is small enough to read top to bottom. Open it in the browser, then op
 
 | Page | Concepts to find in the source |
 |------|--------------------------------|
-| `index.html` | **WebGL**: a fragment shader (the `x-shader/x-fragment` script) draws the animated background on the GPU. `requestAnimationFrame` loop. **Pointer events** move the glow and fatten nearby letters via variable-font weight. `prefers-reduced-motion` honored. Graceful fallback when WebGL is missing. |
+| `index.html` | **Progressive enhancement**: scroll-driven CSS animation (`animation-timeline: view()`) with an IntersectionObserver fallback. **View Transitions** for page-to-page navigation. **Container queries** and `:has()`. **Lazy iframes** that load only when scrolled into view and unload after. `prefers-reduced-motion` honored. |
+| `hello-original.html` | **WebGL**: a fragment shader (the `x-shader/x-fragment` script) draws the animated background on the GPU. `requestAnimationFrame` loop. **Pointer events** move the glow and fatten nearby letters via variable-font weight. `prefers-reduced-motion` honored. Graceful fallback when WebGL is missing. |
 | `hello-dev-poster.html` | **DOM events**: `addEventListener` on buttons, `classList` to toggle styles, `querySelector` to find elements. A `@media` query for responsive layout. |
 | `hello-farah-landing.html` | **CSS Grid** (`grid-template…`), inline **SVG**, **`localStorage`** (state that survives a page reload), `setTimeout`. |
 | `hello-priya-greeting.html` | **Timers**: `setInterval` cycles greetings. SVG, `classList`, and a `@media` query. |
