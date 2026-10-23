@@ -59,9 +59,25 @@
     opacity:0; animation:fadeIn 1.4s ease forwards; animation-delay:1.7s;
   }
 
+  .pages{
+    position:fixed; bottom:56px; left:0; right:0; z-index:6;
+    display:flex; flex-wrap:wrap; justify-content:center; gap:10px 26px;
+    padding:0 16px;
+    opacity:0; animation:fadeIn 1.4s ease forwards; animation-delay:2s;
+  }
+  .pages a{
+    font-size:12px; letter-spacing:0.1em; text-transform:uppercase;
+    color:rgba(251,247,239,0.6); text-decoration:none; cursor:pointer;
+    padding:4px 0; border-bottom:1px solid transparent;
+    transition:color .2s, border-color .2s;
+  }
+  .pages a:hover, .pages a:focus-visible{
+    color:var(--text); border-bottom-color:rgba(251,247,239,0.6); outline:none;
+  }
+
   @media (prefers-reduced-motion: reduce){
     h1{animation:none; opacity:1; filter:none;}
-    .caption, .credit{animation:none; opacity:1;}
+    .caption, .credit, .pages{animation:none; opacity:1;}
   }
 </style>
 </head>
@@ -73,6 +89,14 @@
   <h1 id="headline" aria-label="Hello, World."></h1>
   <div class="caption">The first thing every program learns to say</div>
 </main>
+
+<nav class="pages" aria-label="More hello worlds">
+  <a href="hello-dev-poster.html">Poster</a>
+  <a href="hello-farah-landing.html">Landing</a>
+  <a href="hello-priya-greeting.html">Languages</a>
+  <a href="hello-sam-repl.html">REPL</a>
+  <a href="hello-voice-utterance.html">Spoken</a>
+</nav>
 
 <div class="credit">print("Hello, World.")</div>
 <div class="cursor-glow" id="cursorGlow"></div>
