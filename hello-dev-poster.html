@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hello, World — No. 01</title>
+<meta name="description" content="An exhibition poster for two words.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f2ede1; --ink:#161412; --red:#d3361f;
+    --cyan:#00b4c8; --magenta:#e0208a; --yellow:#f2c200;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%; overflow:hidden;}
+  body{background:var(--paper); color:var(--ink); font-family:'Archivo', sans-serif;}
+  .mono{font-family:'JetBrains Mono', monospace;}
+
+  .grid-overlay{
+    position:fixed; inset:0; z-index:1; pointer-events:none; opacity:0;
+    transition:opacity .3s ease;
+    background-image:
+      repeating-linear-gradient(90deg, rgba(211,54,31,0.35) 0, rgba(211,54,31,0.35) 1px, transparent 1px, transparent calc(100% / 12)),
+      repeating-linear-gradient(0deg, rgba(211,54,31,0.35) 0, rgba(211,54,31,0.35) 1px, transparent 1px, transparent calc(100% / 8));
+  }
+  .grid-overlay.on{opacity:1;}
+
+  .frame{position:fixed; inset:28px; border:1.5px solid var(--ink); z-index:2;}
+
+  .index{
+    position:fixed; top:44px; right:52px; z-index:3; text-align:right;
+  }
+  .index .no{font-family:'Archivo'; font-weight:900; font-size:15px; letter-spacing:0.02em;}
+  .index .sub{font-family:'JetBrains Mono'; font-size:10.5px; color:var(--red); margin-top:4px; letter-spacing:0.06em;}
+
+  .kicker{
+    position:fixed; top:44px; left:52px; z-index:3;
+    font-family:'JetBrains Mono'; font-size:10.5px; letter-spacing:0.14em; text-transform:uppercase;
+  }
+
+  .stack{position:relative; display:inline-block;}
+  .stack .layer{
+    position:absolute; inset:0; mix-blend-mode:multiply; transition:transform 1.5s cubic-bezier(.16,1,.3,1);
+  }
+  .stack .layer.c{color:var(--cyan);}
+  .stack .layer.m{color:var(--magenta);}
+  .stack .layer.y{color:var(--yellow);}
+  .stack .layer.k{color:var(--ink); position:relative; mix-blend-mode:normal;}
+
+  h1{
+    font-weight:900; line-height:0.86; letter-spacing:-0.02em;
+    font-size:clamp(70px, 15vw, 220px);
+    text-transform:uppercase;
+  }
+
+  .comp{position:fixed; inset:0; z-index:2; display:flex; flex-direction:column; justify-content:space-between; padding:120px 60px;}
+  .word-hello{align-self:flex-start;}
+  .word-world{align-self:flex-end; color:var(--red);}
+  .stack.world .layer.k{color:var(--red);}
+
+  .colophon{
+    position:fixed; bottom:44px; left:52px; z-index:3; max-width:320px;
+    font-family:'JetBrains Mono'; font-size:10.5px; line-height:1.7; color:#4a453d;
+  }
+
+  .controls{
+    position:fixed; bottom:44px; right:52px; z-index:3; display:flex; gap:10px;
+  }
+  .controls button{
+    font-family:'JetBrains Mono'; font-size:10.5px; letter-spacing:0.05em; text-transform:uppercase;
+    background:transparent; border:1.5px solid var(--ink); color:var(--ink); padding:9px 16px;
+    cursor:pointer; transition:all .2s ease;
+  }
+  .controls button:hover{background:var(--ink); color:var(--paper);}
+  .controls button.active{background:var(--red); border-color:var(--red); color:var(--paper);}
+
+  @media (max-width:760px){
+    .comp{padding:100px 24px;}
+    .frame{inset:14px;}
+    .index, .kicker{left:32px; right:32px;}
+    .colophon, .controls{left:32px; right:32px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-overlay" id="gridOverlay"></div>
+<div class="frame"></div>
+
+<div class="kicker">Hello World — Exhibition Series</div>
+<div class="index">
+  <div class="no">№ 01</div>
+  <div class="sub">4-color, corrected</div>
+</div>
+
+<div class="comp">
+  <div class="word-hello stack" id="stackHello">
+    <h1 class="layer c">Hello,</h1>
+    <h1 class="layer m">Hello,</h1>
+    <h1 class="layer y">Hello,</h1>
+    <h1 class="layer k">Hello,</h1>
+  </div>
+  <div class="word-world stack world" id="stackWorld">
+    <h1 class="layer c">World.</h1>
+    <h1 class="layer m">World.</h1>
+    <h1 class="layer y">World.</h1>
+    <h1 class="layer k">World.</h1>
+  </div>
+</div>
+
+<div class="colophon mono">Set in Archivo, black. Four plates — cyan, magenta, yellow, key — brought into register on load. Edition: unlimited.</div>
+
+<div class="controls">
+  <button id="gridBtn">Show grid</button>
+  <button id="replayBtn">Replay registration</button>
+</div>
+
+<script>
+  function offsetLayers(stackEl, spread){
+    const layers = stackEl.querySelectorAll('.layer');
+    const offsets = [
+      [-spread, -spread*0.6],
+      [spread*0.8, spread*0.5],
+      [-spread*0.5, spread*0.8],
+      [spread*0.3, -spread*0.4]
+    ];
+    layers.forEach((l, i) => {
+      l.style.transition = 'none';
+      l.style.transform = `translate(${offsets[i][0]}px, ${offsets[i][1]}px)`;
+    });
+    // force reflow so the next transform change animates
+    void stackEl.offsetWidth;
+    layers.forEach((l, i) => {
+      l.style.transition = `transform 1.5s cubic-bezier(.16,1,.3,1) ${i * 90}ms`;
+      l.style.transform = 'translate(0,0)';
+    });
+  }
+
+  const stackHello = document.getElementById('stackHello');
+  const stackWorld = document.getElementById('stackWorld');
+
+  function runRegistration(){
+    offsetLayers(stackHello, 22);
+    offsetLayers(stackWorld, 22);
+  }
+  runRegistration();
+
+  document.getElementById('replayBtn').addEventListener('click', runRegistration);
+
+  const gridOverlay = document.getElementById('gridOverlay');
+  const gridBtn = document.getElementById('gridBtn');
+  gridBtn.addEventListener('click', () => {
+    const on = gridOverlay.classList.toggle('on');
+    gridBtn.classList.toggle('active', on);
+    gridBtn.textContent = on ? 'Hide grid' : 'Show grid';
+  });
+</script>
+
+</body>
+</html>

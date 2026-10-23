@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hello, World — REPL</title>
+<meta name="description" content="Hello, World, run for real, in twelve languages.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1a1d27; --panel:#20232f; --line:#2f3342; --text:#d7dae3; --dim:#666c80;
+    --kw:#7aa2f7; --str:#9ece6a; --cm:#565f76; --fn:#7dcfff; --num:#ff9e64; --op:#bb9af7;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:var(--bg); color:var(--text); font-family:'JetBrains Mono', monospace;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .window{
+    width:100%; max-width:880px; background:var(--panel); border-radius:12px; overflow:hidden;
+    box-shadow:0 30px 80px rgba(0,0,0,0.5); border:1px solid var(--line);
+  }
+  .titlebar{
+    display:flex; align-items:center; gap:10px; padding:12px 16px; background:#181a24; border-bottom:1px solid var(--line);
+  }
+  .dots{display:flex; gap:7px;}
+  .dots span{width:11px; height:11px; border-radius:50%;}
+  .dots .r{background:#ff5f57;} .dots .y{background:#febc2e;} .dots .g{background:#28c840;}
+  .titlebar .path{margin-left:12px; font-size:12.5px; color:var(--dim);}
+
+  .term{padding:26px 28px; min-height:340px; font-size:15px; line-height:1.7;}
+  .line{white-space:pre-wrap; word-break:break-word;}
+  .prompt{color:#9ece6a;}
+  .path-seg{color:#7aa2f7;}
+  .cursor{display:inline-block; width:8px; height:16px; background:var(--text); vertical-align:-3px; animation:blink 1s step-end infinite;}
+  @keyframes blink{50%{opacity:0;}}
+  .output{color:#fff; font-weight:700;}
+  .exit{color:var(--dim); font-size:13px;}
+
+  .kw{color:var(--kw);} .str{color:var(--str);} .cm{color:var(--cm); font-style:italic;}
+  .fn{color:var(--fn);} .num{color:var(--num);} .op{color:var(--op);}
+
+  .footer-bar{
+    display:flex; align-items:center; justify-content:space-between; padding:14px 20px;
+    border-top:1px solid var(--line); background:#181a24;
+  }
+  .lang-badge{
+    font-size:12px; color:var(--dim); display:flex; align-items:center; gap:8px;
+  }
+  .lang-badge .dot{width:8px; height:8px; border-radius:50%; background:var(--fn);}
+  .pager{display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;}
+  .pager button{
+    background:none; border:1px solid var(--line); color:var(--dim); font-family:inherit;
+    font-size:11px; padding:5px 9px; border-radius:6px; cursor:pointer; transition:all .2s ease;
+  }
+  .pager button:hover{color:var(--text); border-color:var(--fn);}
+  .pager button.active{color:#0b0c10; background:var(--fn); border-color:var(--fn); font-weight:700;}
+
+  .hint{margin-top:18px; text-align:center; font-size:12px; color:#4b5066;}
+</style>
+</head>
+<body>
+
+<div class="window">
+  <div class="titlebar">
+    <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+    <div class="path">~/hello-world — zsh</div>
+  </div>
+  <div class="term" id="term"></div>
+  <div class="footer-bar">
+    <div class="lang-badge"><span class="dot" id="langDot"></span><span id="langName">—</span></div>
+    <div class="pager" id="pager"></div>
+  </div>
+</div>
+
+<script>
+  const languages = [
+    {
+      name: 'Python', color:'#7dcfff', prompt:'python3 hello.py',
+      html: `<span class="kw">print</span>(<span class="str">"Hello, World."</span>)`,
+      output: 'Hello, World.'
+    },
+    {
+      name: 'JavaScript', color:'#f7df1e', prompt:'node hello.js',
+      html: `<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"Hello, World."</span>);`,
+      output: 'Hello, World.'
+    },
+    {
+      name: 'Rust', color:'#dea584', prompt:'cargo run', pathPrefix:'   Compiling hello v0.1.0\n    Finished dev profile\n     Running `target/debug/hello`\n',
+      html: `<span class="kw">fn</span> <span class="fn">main</span>() {\n    <span class="fn">println!</span>(<span class="str">"Hello, World."</span>);\n}`,
+      output: 'Hello, World.'
+    },
+    {
+      name: 'Go', color:'#00add8', prompt:'go run hello.go',
+      html: `<span class="kw">package</span> main\n\n<span class="kw">import</span> <span class="str">"fmt"</span>\n\n<span class="kw">func</span> <span class="fn">main</span>() {\n\t<span class="fn">fmt.Println</span>(<span class="str">"Hello, World."</span>)\n}`,
+      output: 'Hello, World.'
+    },
+    {
+      name: 'C', color:'#5c6bc0', prompt:'gcc hello.c -o hello && ./hello',
+      html: `<span class="op">#include</span> <span class="str">&lt;stdio.h&gt;</span>\n\n<span class="kw">int</span> <span class="fn">main</span>() {\n    <span class="fn">printf</span>(<span class="str">"Hello, World.\\n"</span>);\n    <span class="kw">return</span> <span class="num">0</span>;\n}`,
+      output: 'Hello, World.'
+    },
+    {
+      name: 'Java', color:'#e76f00', prompt:'java Hello.java',
+      html: `<span class="kw">public class</span> <span class="fn">Hello</span> {\n    <span class="kw">public static void</span> <span class="fn">main</span>(String[] args) {\n        System.<span class="fn">out</span>.<span class="fn">println</span>(<span class="str">"Hello, World."</span>);\n    }\n}`,
+      output: 'Hello, World.'
+    },
+    {
+      name: 'Ruby', color:'#cc342d', prompt:'ruby hello.rb',
+      html: `<span class="fn">puts</span> <span class="str">"Hello, World."</span>`,
+      output: 'Hello, World.'
+    },
+    {
+      name: 'Swift', color:'#f05138', prompt:'swift hello.swift',
+      html: `<span class="fn">print</span>(<span class="str">"Hello, World."</span>)`,
+      output: 'Hello, World.'
+    },
+    {
+      name: 'Kotlin', color:'#7f52ff', prompt:'kotlinc hello.kt -include-runtime -d hello.jar && java -jar hello.jar',
+      html: `<span class="kw">fun</span> <span class="fn">main</span>() {\n    <span class="fn">println</span>(<span class="str">"Hello, World."</span>)\n}`,
+      output: 'Hello, World.'
+    },
+    {
+      name: 'Haskell', color:'#5e5086', prompt:'runghc hello.hs',
+      html: `<span class="kw">main</span> <span class="op">=</span> <span class="fn">putStrLn</span> <span class="str">"Hello, World."</span>`,
+      output: 'Hello, World.'
+    },
+    {
+      name: 'Bash', color:'#89e051', prompt:'./hello.sh',
+      html: `<span class="op">#!/bin/bash</span>\n<span class="fn">echo</span> <span class="str">"Hello, World."</span>`,
+      output: 'Hello, World.'
+    },
+    {
+      name: 'SQL', color:'#e38c00', prompt:'sqlite3 :memory: "SELECT \'Hello, World.\';"',
+      html: `<span class="kw">SELECT</span> <span class="str">'Hello, World.'</span>;`,
+      output: 'Hello, World.'
+    }
+  ];
+
+  const term = document.getElementById('term');
+  const langName = document.getElementById('langName');
+  const langDot = document.getElementById('langDot');
+  const pager = document.getElementById('pager');
+  let current = 0;
+  let running = false;
+  let cancelToken = 0;
+
+  languages.forEach((l, i) => {
+    const b = document.createElement('button');
+    b.textContent = i + 1;
+    b.title = l.name;
+    b.addEventListener('click', () => play(i));
+    pager.appendChild(b);
+  });
+
+  function setActivePager(i){
+    [...pager.children].forEach((b, idx) => b.classList.toggle('active', idx === i));
+  }
+
+  function sleep(ms, token){
+    return new Promise(resolve => {
+      setTimeout(() => resolve(token === cancelToken), ms);
+    });
+  }
+
+  async function typeText(el, htmlContent, speed){
+    const tmp = document.createElement('div');
+    tmp.innerHTML = htmlContent;
+    const walk = (node, target) => {
+      node.childNodes.forEach(child => {
+        if(child.nodeType === Node.TEXT_NODE){
+          target.appendChild(document.createTextNode(child.textContent));
+        } else {
+          const clone = document.createElement(child.tagName);
+          clone.className = child.className;
+          target.appendChild(clone);
+          walk(child, clone);
+        }
+      });
+    };
+    // Reveal char by char across the flattened text, preserving span structure by
+    // progressively increasing a clip using a plain-text/HTML hybrid typewriter.
+    const full = tmp.innerHTML;
+    const plain = tmp.textContent;
+    const myToken = cancelToken;
+    for(let i = 1; i <= plain.length; i++){
+      if(myToken !== cancelToken) return false;
+      el.innerHTML = clipHtmlToLength(full, i);
+      if(i < plain.length) await sleep(speed + (Math.random() * 20), myToken);
+    }
+    return true;
+  }
+
+  function clipHtmlToLength(html, len){
+    let out = '';
+    let count = 0;
+    let i = 0;
+    while(i < html.length && count < len){
+      if(html[i] === '<'){
+        const close = html.indexOf('>', i);
+        out += html.slice(i, close + 1);
+        i = close + 1;
+      } else {
+        out += html[i];
+        count++;
+        i++;
+      }
+    }
+    return out + '<span class="cursor"></span>';
+  }
+
+  async function play(idx){
+    current = idx;
+    cancelToken++;
+    const myToken = cancelToken;
+    running = true;
+    const lang = languages[idx];
+    langName.textContent = lang.name;
+    langDot.style.background = lang.color;
+    setActivePager(idx);
+    term.innerHTML = '';
+
+    const promptLine = document.createElement('div');
+    promptLine.className = 'line';
+    promptLine.innerHTML = `<span class="prompt">~/hello-world</span> <span class="op">$</span> `;
+    term.appendChild(promptLine);
+    const promptCursor = document.createElement('span');
+    promptLine.appendChild(promptCursor);
+
+    const ok1 = await typeText(promptCursor, escapeHtml(lang.prompt), 32);
+    if(!ok1 || myToken !== cancelToken) return;
+    promptLine.querySelector('.cursor')?.remove();
+
+    await sleep(260, myToken);
+    if(myToken !== cancelToken) return;
+
+    const codeLine = document.createElement('div');
+    codeLine.className = 'line';
+    codeLine.style.color = 'var(--dim)';
+    codeLine.style.margin = '10px 0';
+    term.appendChild(codeLine);
+    if(lang.pathPrefix){
+      const pre = document.createElement('div');
+      pre.className = 'line exit';
+      pre.style.marginBottom = '8px';
+      pre.textContent = lang.pathPrefix;
+      term.insertBefore(pre, codeLine);
+    }
+    const ok2 = await typeText(codeLine, lang.html, 10);
+    if(!ok2 || myToken !== cancelToken) return;
+    codeLine.querySelector('.cursor')?.remove();
+
+    await sleep(400, myToken);
+    if(myToken !== cancelToken) return;
+
+    const out = document.createElement('div');
+    out.className = 'line output';
+    out.style.marginTop = '14px';
+    term.appendChild(out);
+    await typeText(out, escapeHtml(lang.output), 26);
+    if(myToken !== cancelToken) return;
+    out.querySelector('.cursor')?.remove();
+
+    const exit = document.createElement('div');
+    exit.className = 'line exit';
+    exit.style.marginTop = '10px';
+    exit.textContent = 'Process finished with exit code 0';
+    term.appendChild(exit);
+
+    await sleep(2600, myToken);
+    if(myToken !== cancelToken) return;
+    play((idx + 1) % languages.length);
+  }
+
+  function escapeHtml(s){
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  play(0);
+</script>
+
+</body>
+</html>

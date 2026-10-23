@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hello, World — In Every Language</title>
+<meta name="description" content="A greeting that works for everyone, in their own script, at their own pace.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;600&family=Noto+Sans+KR:wght@400;600&family=Noto+Sans+SC:wght@400;600&family=Noto+Sans+Arabic:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#22201c; --ink-soft:#6b6558; --paper:#fbf6ee; --line:#e6ddc9; --accent:#c7702f; --accent-tint:#f7e9d8;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:var(--paper); color:var(--ink); font-family:'Inter', sans-serif;
+    display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px;
+  }
+  .card{width:100%; max-width:620px; text-align:center;}
+
+  .globe{margin:0 auto 30px; width:64px; height:64px;}
+  .globe svg{width:100%; height:100%; color:var(--accent);}
+
+  .sr-only{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+    clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+
+  .greeting-stage{
+    min-height:180px; display:flex; align-items:center; justify-content:center;
+  }
+  .greeting{
+    font-size:clamp(34px, 6vw, 58px); font-weight:700; line-height:1.25;
+    opacity:0; transform:translateY(10px);
+    transition:opacity .5s ease, transform .5s ease;
+  }
+  .greeting.show{opacity:1; transform:translateY(0);}
+  .greeting[lang="ja"]{font-family:'Noto Sans JP', sans-serif;}
+  .greeting[lang="ko"]{font-family:'Noto Sans KR', sans-serif;}
+  .greeting[lang="zh"]{font-family:'Noto Sans SC', sans-serif;}
+  .greeting[lang="ar"]{font-family:'Noto Sans Arabic', sans-serif;}
+  .greeting[lang="hi"]{font-family:'Noto Sans Devanagari', sans-serif;}
+  .greeting[dir="rtl"]{direction:rtl;}
+
+  .lang-label{
+    margin-top:6px; font-size:12.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-soft);
+  }
+
+  .controls{margin-top:36px; display:flex; align-items:center; justify-content:center; gap:16px;}
+  .control-btn{
+    width:44px; height:44px; border-radius:50%; border:1.5px solid var(--line); background:#fff;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink);
+    transition:border-color .2s ease, transform .2s ease;
+  }
+  .control-btn:hover{border-color:var(--accent); transform:translateY(-2px);}
+  .control-btn:focus-visible{outline:3px solid var(--accent); outline-offset:2px;}
+  #playPause{background:var(--ink); border-color:var(--ink); color:var(--paper);}
+
+  .dots{margin-top:24px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap; max-width:420px; margin-left:auto; margin-right:auto;}
+  .dot-btn{
+    width:9px; height:9px; border-radius:50%; border:none; background:var(--line); cursor:pointer; padding:0;
+    transition:background .2s ease, transform .2s ease;
+  }
+  .dot-btn.active{background:var(--accent); transform:scale(1.3);}
+  .dot-btn:focus-visible{outline:2px solid var(--accent); outline-offset:3px;}
+
+  .caption{margin-top:34px; font-size:13px; color:var(--ink-soft); max-width:420px; margin-left:auto; margin-right:auto; line-height:1.6;}
+
+  @media (prefers-reduced-motion: reduce){
+    .greeting{transition:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="globe" aria-hidden="true">
+    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6">
+      <circle cx="32" cy="32" r="27"/>
+      <ellipse cx="32" cy="32" rx="27" ry="12"/>
+      <ellipse cx="32" cy="32" rx="12" ry="27"/>
+      <line x1="5" y1="32" x2="59" y2="32"/>
+    </svg>
+  </div>
+
+  <div class="greeting-stage">
+    <div class="greeting show" id="greeting" lang="en">Hello, World.</div>
+  </div>
+  <div class="lang-label" id="langLabel">English</div>
+  <div class="sr-only" role="status" aria-live="polite" id="liveRegion"></div>
+
+  <div class="controls">
+    <button class="control-btn" id="prevBtn" aria-label="Previous language">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg>
+    </button>
+    <button class="control-btn" id="playPause" aria-label="Pause automatic rotation" aria-pressed="true">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" id="playIcon"><rect x="5" y="4" width="5" height="16" rx="1"/><rect x="14" y="4" width="5" height="16" rx="1"/></svg>
+    </button>
+    <button class="control-btn" id="nextBtn" aria-label="Next language">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+
+  <div class="dots" id="dots"></div>
+
+  <p class="caption">Twelve languages, rotating automatically — pause anytime, or jump directly with the dots below. Motion stops automatically if your system prefers reduced motion.</p>
+</div>
+
+<script>
+  const greetings = [
+    { lang:'en', dir:'ltr', text:'Hello, World.', name:'English' },
+    { lang:'es', dir:'ltr', text:'¡Hola, Mundo!', name:'Español' },
+    { lang:'fr', dir:'ltr', text:'Bonjour, le monde !', name:'Français' },
+    { lang:'de', dir:'ltr', text:'Hallo, Welt!', name:'Deutsch' },
+    { lang:'pt', dir:'ltr', text:'Olá, Mundo!', name:'Português' },
+    { lang:'ru', dir:'ltr', text:'Привет, мир!', name:'Русский' },
+    { lang:'ja', dir:'ltr', text:'こんにちは、世界。', name:'日本語' },
+    { lang:'zh', dir:'ltr', text:'你好，世界。', name:'中文' },
+    { lang:'ko', dir:'ltr', text:'안녕, 세상아.', name:'한국어' },
+    { lang:'ar', dir:'rtl', text:'مرحباً أيها العالم!', name:'العربية' },
+    { lang:'hi', dir:'ltr', text:'नमस्ते, दुनिया।', name:'हिन्दी' },
+    { lang:'sw', dir:'ltr', text:'Habari, Dunia!', name:'Kiswahili' }
+  ];
+
+  const greetingEl = document.getElementById('greeting');
+  const langLabel = document.getElementById('langLabel');
+  const liveRegion = document.getElementById('liveRegion');
+  const dotsWrap = document.getElementById('dots');
+  const playPause = document.getElementById('playPause');
+  const playIcon = document.getElementById('playIcon');
+
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let index = 0;
+  let playing = !reduceMotion;
+  let timer = null;
+
+  greetings.forEach((g, i) => {
+    const b = document.createElement('button');
+    b.className = 'dot-btn' + (i === 0 ? ' active' : '');
+    b.setAttribute('aria-label', 'Show ' + g.name);
+    b.addEventListener('click', () => { show(i); resetTimer(); });
+    dotsWrap.appendChild(b);
+  });
+
+  function show(i){
+    index = (i + greetings.length) % greetings.length;
+    const g = greetings[index];
+    greetingEl.classList.remove('show');
+    setTimeout(() => {
+      greetingEl.textContent = g.text;
+      greetingEl.setAttribute('lang', g.lang);
+      greetingEl.setAttribute('dir', g.dir);
+      langLabel.textContent = g.name;
+      liveRegion.textContent = 'Now showing: ' + g.name;
+      [...dotsWrap.children].forEach((d, di) => d.classList.toggle('active', di === index));
+      requestAnimationFrame(() => greetingEl.classList.add('show'));
+    }, reduceMotion ? 0 : 220);
+  }
+
+  function startTimer(){
+    if(timer) clearInterval(timer);
+    timer = setInterval(() => show(index + 1), 2600);
+  }
+  function stopTimer(){
+    if(timer) clearInterval(timer);
+    timer = null;
+  }
+  function resetTimer(){
+    if(playing){ startTimer(); }
+  }
+
+  playPause.addEventListener('click', () => {
+    playing = !playing;
+    playPause.setAttribute('aria-pressed', String(playing));
+    playPause.setAttribute('aria-label', playing ? 'Pause automatic rotation' : 'Resume automatic rotation');
+    if(playing){
+      playIcon.innerHTML = '<rect x="5" y="4" width="5" height="16" rx="1"/><rect x="14" y="4" width="5" height="16" rx="1"/>';
+      startTimer();
+    } else {
+      playIcon.innerHTML = '<path d="M6 4l14 8-14 8z"/>';
+      stopTimer();
+    }
+  });
+
+  document.getElementById('prevBtn').addEventListener('click', () => { show(index - 1); resetTimer(); });
+  document.getElementById('nextBtn').addEventListener('click', () => { show(index + 1); resetTimer(); });
+
+  if(reduceMotion){
+    playing = false;
+    playPause.setAttribute('aria-pressed', 'false');
+    playPause.setAttribute('aria-label', 'Resume automatic rotation');
+    playIcon.innerHTML = '<path d="M6 4l14 8-14 8z"/>';
+  } else {
+    startTimer();
+  }
+</script>
+
+</body>
+</html>
