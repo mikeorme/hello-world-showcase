@@ -3,289 +3,199 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hello, World.</title>
-<meta name="description" content="The first thing every program learns to say.">
+<title>Hello, World. Six Ways.</title>
+<meta name="description" content="One sentence, six very different pages, and the dramatized story of how they came to be.">
+<meta property="og:title" content="Hello, World. Six ways to say it.">
+<meta property="og:description" content="Six hello-world pages. One dramatized legend.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23050308'/%3E%3Ctext x='16' y='23' font-size='20' text-anchor='middle' fill='%23f0a35c' font-family='serif'%3EH%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,100..900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root{ --text:#fbf7ef; }
-  *{margin:0; padding:0; box-sizing:border-box;}
-  html,body{height:100%; overflow:hidden; background:#050308;}
-  body{
-    font-family:'JetBrains Mono', monospace;
-    cursor:none;
+  :root{
+    --bg:#050308; --bg2:#0d0914; --ink:#fbf7ef; --muted:rgba(251,247,239,.62);
+    --line:rgba(251,247,239,.14); --accent:#f0a35c; --accent2:#c0476a;
+    --serif:'Fraunces', Georgia, 'Times New Roman', serif;
+    --mono:'JetBrains Mono', ui-monospace, Menlo, monospace;
+    --gutter:clamp(16px, 5vw, 56px);
   }
-  canvas#gl{position:fixed; inset:0; width:100%; height:100%; display:block;}
+  *{box-sizing:border-box; margin:0; padding:0}
+  html{scroll-behavior:smooth; background:var(--bg)}
+  body{background:var(--bg); color:var(--ink); font-family:var(--mono); font-size:15px; line-height:1.65; overflow-x:hidden}
+  .wrap{max-width:1120px; margin-inline:auto; padding-inline:var(--gutter)}
+  .skip{position:absolute; left:-999px} .skip:focus{left:12px; top:12px; z-index:99; background:var(--ink); color:var(--bg); padding:8px 12px}
+  a{color:inherit} :focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+  .kicker{font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--accent)}
+  h1,h2,h3{font-family:var(--serif); font-weight:300; line-height:1.02; letter-spacing:-.01em}
+  h2{font-size:clamp(36px,6vw,84px)}
+  .chapter{padding-block:clamp(72px,14vw,180px); border-top:1px solid var(--line)}
+  .lede{font-size:clamp(17px,2.2vw,22px); color:var(--muted); max-width:56ch; margin-top:24px}
+  blockquote{font-family:var(--serif); font-style:italic; font-weight:300; font-size:clamp(24px,3.6vw,46px); line-height:1.2; margin-block:32px; max-width:26ch}
+  blockquote cite{display:block; font:400 12px/1.4 var(--mono); font-style:normal; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-top:14px}
+  .btn{display:inline-block; padding:14px 24px; border:1px solid var(--ink); border-radius:999px; text-decoration:none; font-size:13px; letter-spacing:.1em; text-transform:uppercase; transition:background .2s,color .2s}
+  .btn:hover,.btn:focus-visible{background:var(--ink); color:var(--bg)}
+  .btn.solid{background:var(--accent); border-color:var(--accent); color:#1a0f05}
+  .btn.solid:hover{background:var(--ink); border-color:var(--ink)}
 
-  .stage{
-    position:fixed; inset:0; z-index:2;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    text-align:center; pointer-events:none;
+  /* reveal: visible by default; enhanced only where supported */
+  .reveal{opacity:1}
+  @supports (animation-timeline: view()){
+    .reveal{animation:rise linear both; animation-timeline:view(); animation-range:entry 0% cover 28%}
+    @keyframes rise{from{opacity:0; translate:0 40px} to{opacity:1; translate:none}}
   }
-  h1{
-    font-family:'Fraunces', serif;
-    font-size:clamp(56px, 12vw, 180px);
-    line-height:0.98;
-    color:var(--text);
-    letter-spacing:-0.01em;
-    text-shadow:0 2px 40px rgba(0,0,0,0.45), 0 0 90px rgba(0,0,0,0.25);
-    opacity:0;
-    filter:blur(14px);
-    animation:reveal 1.6s cubic-bezier(.16,1,.3,1) forwards;
-    animation-delay:.2s;
+  @supports not (animation-timeline: view()){
+    .js .reveal{opacity:0; translate:0 40px; transition:opacity .8s, translate .8s}
+    .js .reveal.in{opacity:1; translate:none}
   }
-  @keyframes reveal{ to{opacity:1; filter:blur(0);} }
-  h1 .ch{ display:inline-block; will-change:font-variation-settings, transform; }
-  h1 .ch.sp{ width:0.28em; }
-
-  .caption{
-    margin-top:26px; font-size:12.5px; letter-spacing:0.14em; text-transform:uppercase;
-    color:rgba(251,247,239,0.55);
-    opacity:0; animation:fadeIn 1.4s ease forwards; animation-delay:1.3s;
-  }
-  @keyframes fadeIn{ to{opacity:1;} }
-
-  .cursor-glow{
-    position:fixed; top:0; left:0; width:26px; height:26px; border-radius:50%;
-    background:radial-gradient(circle, rgba(255,255,255,0.9), rgba(255,255,255,0) 70%);
-    mix-blend-mode:screen; pointer-events:none; z-index:5;
-    transform:translate(-50%,-50%);
-  }
-
-  .credit{
-    position:fixed; bottom:22px; left:0; right:0; z-index:2; text-align:center;
-    font-size:11px; letter-spacing:0.08em; color:rgba(251,247,239,0.32);
-    opacity:0; animation:fadeIn 1.4s ease forwards; animation-delay:1.7s;
-  }
-
-  .pages{
-    position:fixed; bottom:56px; left:0; right:0; z-index:6;
-    display:flex; flex-wrap:wrap; justify-content:center; gap:10px 26px;
-    padding:0 16px;
-    opacity:0; animation:fadeIn 1.4s ease forwards; animation-delay:2s;
-  }
-  .pages a{
-    font-size:12px; letter-spacing:0.1em; text-transform:uppercase;
-    color:rgba(251,247,239,0.6); text-decoration:none; cursor:pointer;
-    padding:4px 0; border-bottom:1px solid transparent;
-    transition:color .2s, border-color .2s;
-  }
-  .pages a:hover, .pages a:focus-visible{
-    color:var(--text); border-bottom-color:rgba(251,247,239,0.6); outline:none;
-  }
-
   @media (prefers-reduced-motion: reduce){
-    h1{animation:none; opacity:1; filter:none;}
-    .caption, .credit, .pages{animation:none; opacity:1;}
+    html{scroll-behavior:auto}
+    .reveal{animation:none!important; opacity:1!important; translate:none!important; transition:none!important}
   }
+
+  .champions{display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%,320px),1fr)); gap:28px; margin-top:56px}
+  .card{position:relative; container-type:inline-size; border:1px solid var(--line); border-radius:18px; background:var(--bg2); overflow:hidden; display:flex; flex-direction:column; transition:transform .3s, border-color .3s}
+  .card:hover,.card:has(a:focus-visible){transform:translateY(-6px); border-color:var(--accent)}
+  .frame{position:relative; aspect-ratio:16/10; overflow:hidden; background:linear-gradient(135deg,#1b1026,#3a1b30); border-bottom:1px solid var(--line)}
+  .frame iframe{position:absolute; top:0; left:0; width:1280px; height:800px; border:0; transform-origin:0 0; transform:scale(var(--s,.25)); pointer-events:none}
+  .card .body{padding:22px; display:flex; flex-direction:column; gap:10px; flex:1}
+  .card h3{font-size:30px; font-weight:400}
+  .card .who{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent)}
+  .card .protest{font-family:var(--serif); font-style:italic; font-size:19px; line-height:1.3}
+  .card p.what{color:var(--muted); font-size:13px}
+  .card .go{margin-top:auto; padding-top:10px; font-size:12px; letter-spacing:.12em; text-transform:uppercase; text-decoration:none}
+  .card .go::after{content:" \2192"}
+  .card .go::before{content:""; position:absolute; inset:0}
+  @container (min-width:420px){ .card h3{font-size:36px} }
+  .lineup{display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%,280px),1fr)); gap:1px; background:var(--line); border:1px solid var(--line); margin-top:48px}
+  .lineup a{background:var(--bg); padding:26px 22px; text-decoration:none; transition:background .2s; display:flex; flex-direction:column; gap:6px}
+  .lineup a:hover,.lineup a:focus-visible{background:var(--bg2)}
+  .lineup b{font-family:var(--serif); font-weight:400; font-size:26px}
+  .lineup span{color:var(--muted); font-size:12px}
+  footer{border-top:1px solid var(--line); padding-block:56px 80px; color:var(--muted); font-size:13px}
+  footer .note{font-family:var(--serif); font-style:italic; font-size:22px; color:var(--ink); margin-bottom:20px}
+  footer nav{display:flex; gap:22px; flex-wrap:wrap; margin-top:18px}
 </style>
 </head>
 <body>
+<a class="skip" href="#brief">Skip to the story</a>
+<header class="wrap" id="top" style="min-height:100svh; display:flex; flex-direction:column; justify-content:center">
+  <p class="kicker reveal">A launch, of sorts</p>
+  <h1 class="reveal" style="font-size:clamp(64px,15vw,220px); margin-top:20px">Hello,<br>World.</h1>
+  <p class="lede reveal">Six ways to say it. One sentence, six very different pages, and the story of how a very simple request got out of hand.</p>
+  <p class="reveal" style="margin-top:36px; display:flex; gap:14px; flex-wrap:wrap">
+    <a class="btn solid" href="#lineup">See the lineup</a>
+    <a class="btn" href="#brief">Read the story</a>
+  </p>
+</header>
+<main>
+<section class="chapter" id="brief"><div class="wrap">
+  <p class="kicker reveal">Chapter 1 · The Brief</p>
+  <h2 class="reveal">It was supposed to be the simplest page on the internet.</h2>
+  <blockquote class="reveal">“Make the most amazing generic ‘hello world’ homepage that you can muster.”<cite>The brief</cite></blockquote>
+  <p class="lede reveal">Then came the words that change everything: a company-wide effort. A tireless, multi-month push, with multiple cross-organizing teams. On paper, one sentence. In the legend, a conference room that never emptied.</p>
+</div></section>
 
-<canvas id="gl"></canvas>
+<section class="chapter" id="draft"><div class="wrap">
+  <p class="kicker reveal">Chapter 2 · The Rejected Draft</p>
+  <h2 class="reveal">The first version had confetti.</h2>
+  <p class="lede reveal">It also had a fake day-counter, a nine-version changelog, and an elaborate joke about the process that produced it.</p>
+  <blockquote class="reveal">“The confetti is lame.”<cite>Leadership, reviewing draft one</cite></blockquote>
+  <p class="lede reveal">The deeper note was fairer: the page was making fun of the work instead of delivering the message. Focus on the message. Level up the craft.</p>
+</div></section>
 
-<main class="stage">
-  <h1 id="headline" aria-label="Hello, World."></h1>
-  <div class="caption">The first thing every program learns to say</div>
+<section class="chapter" id="pivot"><div class="wrap">
+  <p class="kicker reveal">Chapter 3 · The Pivot</p>
+  <h2 class="reveal">So they went to the GPU.</h2>
+  <p class="lede reveal">A hand-written shader painting domain-warped noise on a single triangle. Letters that swell toward your cursor, one variable-font weight at a time. Nothing else on the page. Leadership approved.</p>
+  <p class="reveal" style="margin-top:32px"><a class="btn" href="hello-original.html">Open the original</a></p>
+</div></section>
+
+<section class="chapter" id="champions"><div class="wrap">
+  <p class="kicker reveal">Chapter 4 · The Five Champions</p>
+  <h2 class="reveal">Five other versions. Very different.</h2>
+  <p class="lede reveal">Each championed by one team member, and in the legend, each one a protest against the page before it. The meetings are dramatized. The pages are real.</p>
+  <div class="champions">
+    <article class="card reveal">
+      <div class="frame"><iframe title="Preview of Sam's terminal" data-src="hello-sam-repl.html" tabindex="-1" inert sandbox="allow-scripts"></iframe></div>
+      <div class="body"><span class="who">Sam · Engineer</span><h3>The Terminal</h3>
+        <p class="protest">“Pretty is not a feature. A prompt is.”</p>
+        <p class="what">Types out Hello World in 12 languages with a hand-rolled syntax highlighter.</p>
+        <a class="go" href="hello-sam-repl.html">Open the terminal</a></div>
+    </article>
+    <article class="card reveal">
+      <div class="frame"><iframe title="Preview of Dev's poster" data-src="hello-dev-poster.html" tabindex="-1" inert sandbox="allow-scripts"></iframe></div>
+      <div class="body"><span class="who">Dev · Designer</span><h3>The Poster</h3>
+        <p class="protest">“Fewer effects. More grid.”</p>
+        <p class="what">A Swiss exhibition poster: four ink plates snap into register, with a toggleable grid.</p>
+        <a class="go" href="hello-dev-poster.html">Open the poster</a></div>
+    </article>
+    <article class="card reveal">
+      <div class="frame"><iframe title="Preview of Farah's landing page" data-src="hello-farah-landing.html" tabindex="-1" inert sandbox="allow-scripts"></iframe></div>
+      <div class="body"><span class="who">Farah · Growth</span><h3>The Landing Page</h3>
+        <p class="protest">“Somebody has to ask what the user does next.”</p>
+        <p class="what">An earnest SaaS page with real email validation, a working FAQ, and honest stats.</p>
+        <a class="go" href="hello-farah-landing.html">Open the landing page</a></div>
+    </article>
+    <article class="card reveal">
+      <div class="frame"><iframe title="Preview of Priya's multilingual greeting" data-src="hello-priya-greeting.html" tabindex="-1" inert sandbox="allow-scripts"></iframe></div>
+      <div class="body"><span class="who">Priya · Product</span><h3>The Many Languages</h3>
+        <p class="protest">“‘World’ is bigger than English.”</p>
+        <p class="what">Twelve greetings in native scripts, right-to-left Arabic, and a screen-reader live region.</p>
+        <a class="go" href="hello-priya-greeting.html">Open the greeting</a></div>
+    </article>
+    <article class="card reveal">
+      <div class="frame"><iframe title="Preview of the spoken version" data-src="hello-voice-utterance.html" tabindex="-1" inert sandbox="allow-scripts"></iframe></div>
+      <div class="body"><span class="who">Voice AI Engineer</span><h3>The Spoken Word</h3>
+        <p class="protest">“Why read it when it can be said?”</p>
+        <p class="what">Real speech synthesis with captions that light up word by word.</p>
+        <a class="go" href="hello-voice-utterance.html">Open the voice</a></div>
+    </article>
+  </div>
+</div></section>
+
+<section class="chapter" id="lineup"><div class="wrap">
+  <p class="kicker reveal">The Lineup</p>
+  <h2 class="reveal">Six ways to say it.</h2>
+  <div class="lineup reveal">
+    <a href="hello-original.html"><b>The Original</b><span>WebGL shader and living letters</span></a>
+    <a href="hello-sam-repl.html"><b>The Terminal</b><span>Sam · 12 languages, typed live</span></a>
+    <a href="hello-dev-poster.html"><b>The Poster</b><span>Dev · Swiss print, four plates</span></a>
+    <a href="hello-farah-landing.html"><b>The Landing Page</b><span>Farah · a product launch for a greeting</span></a>
+    <a href="hello-priya-greeting.html"><b>The Many Languages</b><span>Priya · native scripts, accessible</span></a>
+    <a href="hello-voice-utterance.html"><b>The Spoken Word</b><span>Voice · captions in sync</span></a>
+  </div>
+</div></section>
 </main>
 
-<nav class="pages" aria-label="More hello worlds">
-  <a href="hello-dev-poster.html">Poster</a>
-  <a href="hello-farah-landing.html">Landing</a>
-  <a href="hello-priya-greeting.html">Languages</a>
-  <a href="hello-sam-repl.html">REPL</a>
-  <a href="hello-voice-utterance.html">Spoken</a>
-</nav>
-
-<div class="credit">print("Hello, World.")</div>
-<div class="cursor-glow" id="cursorGlow"></div>
-
-<script id="vert" type="x-shader/x-vertex">
-  attribute vec2 a_pos;
-  void main(){
-    gl_Position = vec4(a_pos, 0.0, 1.0);
-  }
-</script>
-
-<script id="frag" type="x-shader/x-fragment">
-  precision highp float;
-  uniform vec2 u_resolution;
-  uniform float u_time;
-  uniform vec2 u_mouse;
-
-  float hash(vec2 p){
-    p = fract(p * vec2(123.34, 456.21));
-    p += dot(p, p + 45.32);
-    return fract(p.x * p.y);
-  }
-  float noise(vec2 p){
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    float a = hash(i);
-    float b = hash(i + vec2(1.0, 0.0));
-    float c = hash(i + vec2(0.0, 1.0));
-    float d = hash(i + vec2(1.0, 1.0));
-    vec2 u = f * f * (3.0 - 2.0 * f);
-    return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
-  }
-  float fbm(vec2 p){
-    float v = 0.0;
-    float amp = 0.5;
-    for(int i = 0; i < 5; i++){
-      v += amp * noise(p);
-      p *= 2.02;
-      amp *= 0.5;
-    }
-    return v;
-  }
-  void main(){
-    vec2 uv = gl_FragCoord.xy / u_resolution.xy;
-    vec2 p = uv;
-    p.x *= u_resolution.x / u_resolution.y;
-    p *= 2.4;
-
-    vec2 mouseOffset = (u_mouse - 0.5) * 0.5;
-    vec2 q = vec2(fbm(p + u_time * 0.045 + mouseOffset), fbm(p + vec2(5.2, 1.3) + u_time * 0.035));
-    vec2 r = vec2(fbm(p + 3.2 * q + vec2(1.7, 9.2) + u_time * 0.02), fbm(p + 3.2 * q + vec2(8.3, 2.8) - u_time * 0.015));
-    float n = fbm(p + 3.2 * r);
-
-    vec3 colA = vec3(0.02, 0.015, 0.05);
-    vec3 colB = vec3(0.18, 0.09, 0.28);
-    vec3 colC = vec3(0.55, 0.24, 0.28);
-    vec3 colD = vec3(0.82, 0.55, 0.32);
-
-    vec3 color = mix(colA, colB, smoothstep(0.05, 0.55, n));
-    color = mix(color, colC, smoothstep(0.4, 0.75, n));
-    color = mix(color, colD, smoothstep(0.68, 0.98, r.x + 0.15));
-
-    float vig = smoothstep(1.15, 0.25, length(uv - 0.5));
-    color *= mix(0.55, 1.05, vig);
-
-    float dither = (hash(gl_FragCoord.xy + fract(u_time)) - 0.5) / 128.0;
-    color += dither;
-
-    gl_FragColor = vec4(color, 1.0);
-  }
-</script>
+<footer><div class="wrap">
+  <p class="note">The meetings are dramatized. The pages are real.</p>
+  <p>Every page is a single HTML file. Open the source, change a word, and watch it change.</p>
+  <nav aria-label="Project links">
+    <a href="https://github.com/mikeorme/hello-world-showcase">View on GitHub</a>
+    <a href="https://github.com/mikeorme/hello-world-showcase/blob/main/LEARNING.md">Learn with this repo</a>
+  </nav>
+</div></footer>
 
 <script>
-  /* ---------- WebGL background ---------- */
-  const canvas = document.getElementById('gl');
-  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  function compile(type, source){
-    const s = gl.createShader(type);
-    gl.shaderSource(s, source);
-    gl.compileShader(s);
-    if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)){
-      console.error(gl.getShaderInfoLog(s));
-    }
-    return s;
+  document.documentElement.classList.add('js');
+  if (!CSS.supports('animation-timeline: view()')) {
+    const io = new IntersectionObserver((es) => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .15 });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
   }
-
-  let program, uRes, uTime, uMouse, dpr = Math.min(devicePixelRatio || 1, 2);
-
-  if(gl){
-    const vSrc = document.getElementById('vert').textContent;
-    const fSrc = document.getElementById('frag').textContent;
-    const vs = compile(gl.VERTEX_SHADER, vSrc);
-    const fs = compile(gl.FRAGMENT_SHADER, fSrc);
-    program = gl.createProgram();
-    gl.attachShader(program, vs);
-    gl.attachShader(program, fs);
-    gl.linkProgram(program);
-    gl.useProgram(program);
-
-    // one oversized triangle covers the viewport — no quad, no seams
-    const buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
-    const aPos = gl.getAttribLocation(program, 'a_pos');
-    gl.enableVertexAttribArray(aPos);
-    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
-
-    uRes = gl.getUniformLocation(program, 'u_resolution');
-    uTime = gl.getUniformLocation(program, 'u_time');
-    uMouse = gl.getUniformLocation(program, 'u_mouse');
-
-    function resize(){
-      canvas.width = innerWidth * dpr;
-      canvas.height = innerHeight * dpr;
-      gl.viewport(0, 0, canvas.width, canvas.height);
-    }
-    resize();
-    addEventListener('resize', resize);
-
-    let mouseTarget = [0.5, 0.5];
-    let mouseSmooth = [0.5, 0.5];
-    addEventListener('pointermove', (e) => {
-      mouseTarget = [e.clientX / innerWidth, 1 - e.clientY / innerHeight];
-    });
-
-    function frame(t){
-      mouseSmooth[0] += (mouseTarget[0] - mouseSmooth[0]) * 0.06;
-      mouseSmooth[1] += (mouseTarget[1] - mouseSmooth[1]) * 0.06;
-      gl.uniform2f(uRes, canvas.width, canvas.height);
-      gl.uniform1f(uTime, reduceMotion ? 8.0 : t * 0.001);
-      gl.uniform2f(uMouse, mouseSmooth[0], mouseSmooth[1]);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
-      if(!reduceMotion) requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-  } else {
-    // graceful fallback if WebGL is unavailable
-    document.body.style.background = 'radial-gradient(circle at 50% 40%, #3a2140, #050308 70%)';
-    canvas.style.display = 'none';
-  }
-
-  /* ---------- Interactive variable-weight headline ---------- */
-  const headline = document.getElementById('headline');
-  const text = 'Hello, World.';
-  [...text].forEach(ch => {
-    const span = document.createElement('span');
-    span.className = 'ch' + (ch === ' ' ? ' sp' : '');
-    span.textContent = ch === ' ' ? ' ' : ch;
-    span.style.fontVariationSettings = "'wght' 340, 'opsz' 144";
-    headline.appendChild(span);
+  document.querySelectorAll('.frame').forEach(frame => {
+    const f = frame.querySelector('iframe');
+    const fit = () => frame.style.setProperty('--s', frame.clientWidth / 1280);
+    new ResizeObserver(fit).observe(frame); fit();
+    f.remove(); // attached only while in view; re-attaching adds no history entries
+    new IntersectionObserver((entries) => {
+      const e = entries.at(-1);
+      if (e.isIntersecting) { if (!f.isConnected) { f.src = f.dataset.src; frame.append(f); } }
+      else f.remove();
+    }, { rootMargin: '150px' }).observe(frame);
   });
-  const chars = [...headline.querySelectorAll('.ch')];
-
-  let px = innerWidth / 2, py = innerHeight / 2;
-  addEventListener('pointermove', (e) => { px = e.clientX; py = e.clientY; });
-
-  const glow = document.getElementById('cursorGlow');
-  let gx = px, gy = py;
-
-  function letters(){
-    if(!reduceMotion){
-      gx += (px - gx) * 0.18;
-      gy += (py - gy) * 0.18;
-      glow.style.transform = `translate(${gx}px, ${gy}px) translate(-50%,-50%)`;
-    }
-    const radius = 260;
-    chars.forEach(el => {
-      const r = el.getBoundingClientRect();
-      const cx = r.left + r.width / 2;
-      const cy = r.top + r.height / 2;
-      const dist = Math.hypot(px - cx, py - cy);
-      const t = Math.max(0, 1 - dist / radius);
-      const eased = t * t * (3 - 2 * t);
-      const wght = 340 + eased * 560;
-      const soft = eased * -2;
-      el.style.fontVariationSettings = `'wght' ${wght.toFixed(0)}, 'opsz' 144`;
-      el.style.transform = `translateY(${(-eased * 10).toFixed(1)}px)`;
-    });
-    requestAnimationFrame(letters);
-  }
-  requestAnimationFrame(letters);
-
-  if(matchMedia('(pointer: coarse)').matches){
-    document.body.style.cursor = 'auto';
-    glow.style.display = 'none';
-  }
 </script>
-
 </body>
 </html>

@@ -6,7 +6,8 @@ Six small, standalone "Hello, World" web pages, each taking the classic first pr
 
 | Page | What it is |
 |------|------------|
-| [index.html](index.html) | Full-screen WebGL background with a headline whose letters swell as the cursor nears |
+| [index.html](index.html) | The story homepage: how these pages came to be (dramatized), with live previews of all six |
+| [hello-original.html](hello-original.html) | Full-screen WebGL background with a headline whose letters swell as the cursor nears |
 | [hello-dev-poster.html](hello-dev-poster.html) | "No. 01" poster |
 | [hello-farah-landing.html](hello-farah-landing.html) | Product-style landing page |
 | [hello-priya-greeting.html](hello-priya-greeting.html) | Hello in many languages |

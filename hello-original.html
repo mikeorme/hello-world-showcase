@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hello, World.</title>
+<meta name="description" content="The first thing every program learns to say.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,100..900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --text:#fbf7ef; }
+  *{margin:0; padding:0; box-sizing:border-box;}
+  html,body{height:100%; overflow:hidden; background:#050308;}
+  body{
+    font-family:'JetBrains Mono', monospace;
+    cursor:none;
+  }
+  canvas#gl{position:fixed; inset:0; width:100%; height:100%; display:block;}
+
+  .stage{
+    position:fixed; inset:0; z-index:2;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; pointer-events:none;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-size:clamp(56px, 12vw, 180px);
+    line-height:0.98;
+    color:var(--text);
+    letter-spacing:-0.01em;
+    text-shadow:0 2px 40px rgba(0,0,0,0.45), 0 0 90px rgba(0,0,0,0.25);
+    opacity:0;
+    filter:blur(14px);
+    animation:reveal 1.6s cubic-bezier(.16,1,.3,1) forwards;
+    animation-delay:.2s;
+  }
+  @keyframes reveal{ to{opacity:1; filter:blur(0);} }
+  h1 .ch{ display:inline-block; will-change:font-variation-settings, transform; }
+  h1 .ch.sp{ width:0.28em; }
+
+  .caption{
+    margin-top:26px; font-size:12.5px; letter-spacing:0.14em; text-transform:uppercase;
+    color:rgba(251,247,239,0.55);
+    opacity:0; animation:fadeIn 1.4s ease forwards; animation-delay:1.3s;
+  }
+  @keyframes fadeIn{ to{opacity:1;} }
+
+  .cursor-glow{
+    position:fixed; top:0; left:0; width:26px; height:26px; border-radius:50%;
+    background:radial-gradient(circle, rgba(255,255,255,0.9), rgba(255,255,255,0) 70%);
+    mix-blend-mode:screen; pointer-events:none; z-index:5;
+    transform:translate(-50%,-50%);
+  }
+
+  .credit{
+    position:fixed; bottom:22px; left:0; right:0; z-index:2; text-align:center;
+    font-size:11px; letter-spacing:0.08em; color:rgba(251,247,239,0.32);
+    opacity:0; animation:fadeIn 1.4s ease forwards; animation-delay:1.7s;
+  }
+
+  .pages{
+    position:fixed; bottom:56px; left:0; right:0; z-index:6;
+    display:flex; flex-wrap:wrap; justify-content:center; gap:10px 26px;
+    padding:0 16px;
+    opacity:0; animation:fadeIn 1.4s ease forwards; animation-delay:2s;
+  }
+  .pages a{
+    font-size:12px; letter-spacing:0.1em; text-transform:uppercase;
+    color:rgba(251,247,239,0.6); text-decoration:none; cursor:pointer;
+    padding:4px 0; border-bottom:1px solid transparent;
+    transition:color .2s, border-color .2s;
+  }
+  .pages a:hover, .pages a:focus-visible{
+    color:var(--text); border-bottom-color:rgba(251,247,239,0.6); outline:none;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    h1{animation:none; opacity:1; filter:none;}
+    .caption, .credit, .pages{animation:none; opacity:1;}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="gl"></canvas>
+
+<main class="stage">
+  <h1 id="headline" aria-label="Hello, World."></h1>
+  <div class="caption">The first thing every program learns to say</div>
+</main>
+
+<nav class="pages" aria-label="Back to the story">
+  <a href="./">&larr; The story of these pages</a>
+</nav>
+
+<div class="credit">print("Hello, World.")</div>
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<script id="vert" type="x-shader/x-vertex">
+  attribute vec2 a_pos;
+  void main(){
+    gl_Position = vec4(a_pos, 0.0, 1.0);
+  }
+</script>
+
+<script id="frag" type="x-shader/x-fragment">
+  precision highp float;
+  uniform vec2 u_resolution;
+  uniform float u_time;
+  uniform vec2 u_mouse;
+
+  float hash(vec2 p){
+    p = fract(p * vec2(123.34, 456.21));
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+  }
+  float noise(vec2 p){
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    float a = hash(i);
+    float b = hash(i + vec2(1.0, 0.0));
+    float c = hash(i + vec2(0.0, 1.0));
+    float d = hash(i + vec2(1.0, 1.0));
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+  }
+  float fbm(vec2 p){
+    float v = 0.0;
+    float amp = 0.5;
+    for(int i = 0; i < 5; i++){
+      v += amp * noise(p);
+      p *= 2.02;
+      amp *= 0.5;
+    }
+    return v;
+  }
+  void main(){
+    vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+    vec2 p = uv;
+    p.x *= u_resolution.x / u_resolution.y;
+    p *= 2.4;
+
+    vec2 mouseOffset = (u_mouse - 0.5) * 0.5;
+    vec2 q = vec2(fbm(p + u_time * 0.045 + mouseOffset), fbm(p + vec2(5.2, 1.3) + u_time * 0.035));
+    vec2 r = vec2(fbm(p + 3.2 * q + vec2(1.7, 9.2) + u_time * 0.02), fbm(p + 3.2 * q + vec2(8.3, 2.8) - u_time * 0.015));
+    float n = fbm(p + 3.2 * r);
+
+    vec3 colA = vec3(0.02, 0.015, 0.05);
+    vec3 colB = vec3(0.18, 0.09, 0.28);
+    vec3 colC = vec3(0.55, 0.24, 0.28);
+    vec3 colD = vec3(0.82, 0.55, 0.32);
+
+    vec3 color = mix(colA, colB, smoothstep(0.05, 0.55, n));
+    color = mix(color, colC, smoothstep(0.4, 0.75, n));
+    color = mix(color, colD, smoothstep(0.68, 0.98, r.x + 0.15));
+
+    float vig = smoothstep(1.15, 0.25, length(uv - 0.5));
+    color *= mix(0.55, 1.05, vig);
+
+    float dither = (hash(gl_FragCoord.xy + fract(u_time)) - 0.5) / 128.0;
+    color += dither;
+
+    gl_FragColor = vec4(color, 1.0);
+  }
+</script>
+
+<script>
+  /* ---------- WebGL background ---------- */
+  const canvas = document.getElementById('gl');
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function compile(type, source){
+    const s = gl.createShader(type);
+    gl.shaderSource(s, source);
+    gl.compileShader(s);
+    if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)){
+      console.error(gl.getShaderInfoLog(s));
+    }
+    return s;
+  }
+
+  let program, uRes, uTime, uMouse, dpr = Math.min(devicePixelRatio || 1, 2);
+
+  if(gl){
+    const vSrc = document.getElementById('vert').textContent;
+    const fSrc = document.getElementById('frag').textContent;
+    const vs = compile(gl.VERTEX_SHADER, vSrc);
+    const fs = compile(gl.FRAGMENT_SHADER, fSrc);
+    program = gl.createProgram();
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+    gl.useProgram(program);
+
+    // one oversized triangle covers the viewport — no quad, no seams
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+    const aPos = gl.getAttribLocation(program, 'a_pos');
+    gl.enableVertexAttribArray(aPos);
+    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+    uRes = gl.getUniformLocation(program, 'u_resolution');
+    uTime = gl.getUniformLocation(program, 'u_time');
+    uMouse = gl.getUniformLocation(program, 'u_mouse');
+
+    function resize(){
+      canvas.width = innerWidth * dpr;
+      canvas.height = innerHeight * dpr;
+      gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+    resize();
+    addEventListener('resize', resize);
+
+    let mouseTarget = [0.5, 0.5];
+    let mouseSmooth = [0.5, 0.5];
+    addEventListener('pointermove', (e) => {
+      mouseTarget = [e.clientX / innerWidth, 1 - e.clientY / innerHeight];
+    });
+
+    function frame(t){
+      mouseSmooth[0] += (mouseTarget[0] - mouseSmooth[0]) * 0.06;
+      mouseSmooth[1] += (mouseTarget[1] - mouseSmooth[1]) * 0.06;
+      gl.uniform2f(uRes, canvas.width, canvas.height);
+      gl.uniform1f(uTime, reduceMotion ? 8.0 : t * 0.001);
+      gl.uniform2f(uMouse, mouseSmooth[0], mouseSmooth[1]);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      if(!reduceMotion) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  } else {
+    // graceful fallback if WebGL is unavailable
+    document.body.style.background = 'radial-gradient(circle at 50% 40%, #3a2140, #050308 70%)';
+    canvas.style.display = 'none';
+  }
+
+  /* ---------- Interactive variable-weight headline ---------- */
+  const headline = document.getElementById('headline');
+  const text = 'Hello, World.';
+  [...text].forEach(ch => {
+    const span = document.createElement('span');
+    span.className = 'ch' + (ch === ' ' ? ' sp' : '');
+    span.textContent = ch === ' ' ? ' ' : ch;
+    span.style.fontVariationSettings = "'wght' 340, 'opsz' 144";
+    headline.appendChild(span);
+  });
+  const chars = [...headline.querySelectorAll('.ch')];
+
+  let px = innerWidth / 2, py = innerHeight / 2;
+  addEventListener('pointermove', (e) => { px = e.clientX; py = e.clientY; });
+
+  const glow = document.getElementById('cursorGlow');
+  let gx = px, gy = py;
+
+  function letters(){
+    if(!reduceMotion){
+      gx += (px - gx) * 0.18;
+      gy += (py - gy) * 0.18;
+      glow.style.transform = `translate(${gx}px, ${gy}px) translate(-50%,-50%)`;
+    }
+    const radius = 260;
+    chars.forEach(el => {
+      const r = el.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const dist = Math.hypot(px - cx, py - cy);
+      const t = Math.max(0, 1 - dist / radius);
+      const eased = t * t * (3 - 2 * t);
+      const wght = 340 + eased * 560;
+      const soft = eased * -2;
+      el.style.fontVariationSettings = `'wght' ${wght.toFixed(0)}, 'opsz' 144`;
+      el.style.transform = `translateY(${(-eased * 10).toFixed(1)}px)`;
+    });
+    requestAnimationFrame(letters);
+  }
+  requestAnimationFrame(letters);
+
+  if(matchMedia('(pointer: coarse)').matches){
+    document.body.style.cursor = 'auto';
+    glow.style.display = 'none';
+  }
+</script>
+
+</body>
+</html>
